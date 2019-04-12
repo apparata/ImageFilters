@@ -10,6 +10,11 @@ import UIKit
 import GLKit
 #endif
 
+#if canImport(Cocoa)
+import Cocoa
+import GLKit
+#endif
+
 #if !(targetEnvironment(simulator))
 // Can't even compile with Metal on simulator.
 import Metal
@@ -63,6 +68,17 @@ public class CoreImageTool {
             return nil
         }
         let outputImage = UIImage(cgImage: renderedImage, scale: deviceScale, orientation: .up)
+        return outputImage
+    }
+    #endif
+    
+    #if canImport(Cocoa)
+    public func renderImage(image: CIImage, extent: CGRect? = nil) -> NSImage? {
+        let imageExtent = extent ?? image.extent
+        guard let renderedImage = ciContext.createCGImage(image, from: imageExtent) else {
+            return nil
+        }
+        let outputImage = NSImage(cgImage: renderedImage, size: CGSize(width: renderedImage.width, height: renderedImage.height))
         return outputImage
     }
     #endif

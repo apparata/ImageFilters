@@ -14,6 +14,7 @@ public enum CoreImageFilterError: Error {
     case filterError(filterName: String)
     // Some NSColor (macOS) configurations cannot be represented by Core Image
     case colorNotSupported
+    case failedToInitializeMetal
 }
 
 public final class CoreImageFilter {
@@ -44,6 +45,27 @@ public final class CoreImageFilter {
     #if canImport(UIKit)
     public func render(deviceScale: CGFloat = 1.0, extent: CGRect? = nil) -> UIImage? {
         return coreImageTool.renderImage(image: image, deviceScale: deviceScale, extent: extent)
+    }
+    #endif
+    
+    #if canImport(Cocoa)
+    public convenience init?(image: NSImage, coreImageTool: CoreImageTool) {
+        
+        guard let imageData = image.tiffRepresentation else {
+            return nil
+        }
+        
+        guard let ciImage = CIImage(data: imageData) else {
+            return nil
+        }
+
+        self.init(ciImage: ciImage, coreImageTool: coreImageTool)
+    }
+    #endif
+    
+    #if canImport(Cocoa)
+    public func render(deviceScale: CGFloat = 1.0, extent: CGRect? = nil) -> NSImage? {
+        return coreImageTool.renderImage(image: image, extent: extent)
     }
     #endif
     
